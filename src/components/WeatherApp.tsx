@@ -6,9 +6,13 @@ import { RecentSearches } from './weather/RecentSearches';
 import { CurrentWeather } from './weather/CurrentWeather';
 import { WeatherInsights } from './weather/WeatherInsights';
 import { ForecastCards } from './weather/ForecastCards';
+import { AnimatedBackground } from './weather/AnimatedBackground';
+import { MiniMap } from './weather/MiniMap';
+import { FunWeatherFact } from './weather/FunWeatherFact';
+import { WeatherStreaks } from './weather/WeatherStreaks';
 import { Footer } from './weather/Footer';
 import { InfoModal } from './weather/InfoModal';
-import { HireMeModal } from './weather/HireMeModal';
+import { TechStackModal } from './weather/TechStackModal';
 import { useToast } from '@/hooks/use-toast';
 
 export interface WeatherData {
@@ -20,6 +24,7 @@ export interface WeatherData {
   precipitation: number;
   icon: string;
   confidence: number;
+  coordinates?: { lat: number; lng: number };
 }
 
 export interface ForecastData {
@@ -38,7 +43,8 @@ const WeatherApp = () => {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
-  const [hireMeModalOpen, setHireMeModalOpen] = useState(false);
+  const [techStackModalOpen, setTechStackModalOpen] = useState(false);
+  const [searchCount, setSearchCount] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -77,7 +83,8 @@ const WeatherApp = () => {
         windSpeed: 12,
         precipitation: 10,
         icon: 'cloud-sun-rain',
-        confidence: 94
+        confidence: 94,
+        coordinates: { lat: 40.7128, lng: -74.0060 }
       };
 
       const mockForecast: ForecastData[] = [
@@ -90,6 +97,7 @@ const WeatherApp = () => {
 
       setWeatherData(mockWeather);
       setForecastData(mockForecast);
+      setSearchCount(prev => prev + 1);
       
       // Add to recent searches
       setRecentSearches(prev => {
@@ -137,6 +145,35 @@ const WeatherApp = () => {
     );
   };
 
+  const handleVoiceSearch = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      toast({
+        title: "Voice Search Not Supported",
+        description: "Please enter a location manually.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.onresult = (event) => {
+      const location = event.results[0][0].transcript;
+      handleLocationSearch(location);
+    };
+    
+    recognition.onerror = () => {
+      toast({
+        title: "Voice Recognition Failed",
+        description: "Please try again or enter location manually.",
+        variant: "destructive",
+      });
+    };
+    
+    recognition.start();
+  };
+
   const downloadResume = () => {
     toast({
       title: "Resume Download",
@@ -145,8 +182,12 @@ const WeatherApp = () => {
   };
 
   return (
-    <div className="min-h-screen weather-gradient">
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+    <div className="min-h-screen weather-gradient relative overflow-hidden">
+      {weatherData && (
+        <AnimatedBackground condition={weatherData.condition} />
+      )}
+      
+      <div className="container mx-auto px-4 py-6 max-w-6xl relative z-10">
         <Header
           darkMode={darkMode}
           onDarkModeToggle={() => setDarkMode(!darkMode)}
@@ -159,6 +200,7 @@ const WeatherApp = () => {
           <LocationInput
             onSearch={handleLocationSearch}
             onGeolocation={handleGeolocation}
+            onVoiceSearch={handleVoiceSearch}
             loading={loading}
           />
           
@@ -171,20 +213,32 @@ const WeatherApp = () => {
           
           {weatherData && (
             <>
-              <CurrentWeather data={weatherData} />
-              <WeatherInsights location={weatherData.location} />
-              {forecastData.length > 0 && (
-                <ForecastCards data={forecastData} />
-              )}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <div className="lg:col-span-3 space-y-8">
+                  <CurrentWeather data={weatherData} />
+                  <WeatherInsights location={weatherData.location} />
+                  {forecastData.length > 0 && (
+                    <ForecastCards data={forecastData} />
+                  )}
+                </div>
+                
+                <div className="lg:col-span-1 space-y-6">
+                  {weatherData.coordinates && (
+                    <MiniMap coordinates={weatherData.coordinates} />
+                  )}
+                  <FunWeatherFact />
+                  <WeatherStreaks searchCount={searchCount} />
+                </div>
+              </div>
             </>
           )}
           
           <div className="flex justify-center space-x-4">
             <button
-              onClick={() => setHireMeModalOpen(true)}
+              onClick={() => setTechStackModalOpen(true)}
               className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
             >
-              Why Hire Me?
+              Tech Stack Spotlight
             </button>
             <button
               onClick={downloadResume}
@@ -203,9 +257,9 @@ const WeatherApp = () => {
         onOpenChange={setInfoModalOpen}
       />
       
-      <HireMeModal
-        open={hireMeModalOpen}
-        onOpenChange={setHireMeModalOpen}
+      <TechStackModal
+        open={techStackModalOpen}
+        onOpenChange={setTechStackModalOpen}
       />
     </div>
   );
