@@ -1,14 +1,37 @@
 
 import React from 'react';
-import * as LucideIcons from 'lucide-react';
+import { Sun, Cloud, CloudRain, CloudLightning, CloudSnow, Cloudy } from 'lucide-react';
 import type { WeatherData } from '../WeatherApp';
 
 interface CurrentWeatherProps {
   data: WeatherData;
 }
 
+const getWeatherIcon = (condition: string) => {
+  const lowerCondition = condition.toLowerCase();
+  
+  if (lowerCondition.includes('sun') || lowerCondition.includes('clear')) {
+    return Sun;
+  }
+  if (lowerCondition.includes('thunder') || lowerCondition.includes('storm')) {
+    return CloudLightning;
+  }
+  if (lowerCondition.includes('rain') || lowerCondition.includes('drizzle')) {
+    return CloudRain;
+  }
+  if (lowerCondition.includes('snow') || lowerCondition.includes('blizzard')) {
+    return CloudSnow;
+  }
+  if (lowerCondition.includes('cloud') || lowerCondition.includes('overcast')) {
+    return Cloud;
+  }
+  
+  // Default fallback
+  return Cloud;
+};
+
 export const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data }) => {
-  const IconComponent = LucideIcons[data.icon as keyof typeof LucideIcons] as React.ComponentType<{ className?: string }>;
+  const IconComponent = getWeatherIcon(data.condition);
 
   return (
     <div className="swiss-card p-8">
@@ -18,7 +41,7 @@ export const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data }) => {
         {/* Main Temperature */}
         <div className="lg:col-span-2">
           <div className="flex items-center space-x-6 mb-6">
-            {IconComponent && <IconComponent className="w-16 h-16 text-weather-cloudy" />}
+            <IconComponent className="w-16 h-16 text-weather-cloudy" />
             <div>
               <div className="text-6xl font-light tabular-nums">
                 {data.temperature}°

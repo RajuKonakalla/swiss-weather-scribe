@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Info, Sun, Moon } from 'lucide-react';
+import { Info, Sun, Moon, ArrowDown } from 'lucide-react';
 
 interface HeaderProps {
   darkMode: boolean;
@@ -40,6 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
               size="sm"
               onClick={() => onFontScaleChange(Math.max(0.8, fontScale - 0.1))}
               disabled={fontScale <= 0.8}
+              title="Decrease font size"
             >
               -
             </Button>
@@ -48,6 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
               size="sm"
               onClick={() => onFontScaleChange(Math.min(1.4, fontScale + 0.1))}
               disabled={fontScale >= 1.4}
+              title="Increase font size"
             >
               +
             </Button>
@@ -61,6 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
           size="sm"
           onClick={onDarkModeToggle}
           className="w-10 h-10 p-0"
+          title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
           {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
@@ -71,6 +74,7 @@ export const Header: React.FC<HeaderProps> = ({
           size="sm"
           onClick={onInfoClick}
           className="w-10 h-10 p-0"
+          title="About this app"
         >
           <Info className="h-4 w-4" />
         </Button>

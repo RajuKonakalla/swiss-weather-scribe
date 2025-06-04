@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
+import { ArrowDown } from 'lucide-react';
 import { Header } from './weather/Header';
 import { LocationInput } from './weather/LocationInput';
 import { RecentSearches } from './weather/RecentSearches';
@@ -242,9 +242,10 @@ const WeatherApp = () => {
             </button>
             <button
               onClick={downloadResume}
-              className="px-6 py-3 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors font-medium"
+              className="px-6 py-3 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors font-medium inline-flex items-center space-x-2"
             >
-              Download Resume
+              <ArrowDown className="h-4 w-4" />
+              <span>Download Resume</span>
             </button>
           </div>
         </div>

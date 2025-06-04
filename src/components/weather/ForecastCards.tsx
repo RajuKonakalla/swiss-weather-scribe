@@ -1,11 +1,34 @@
 
 import React from 'react';
-import * as LucideIcons from 'lucide-react';
+import { Sun, Cloud, CloudRain, CloudLightning, CloudSnow } from 'lucide-react';
 import type { ForecastData } from '../WeatherApp';
 
 interface ForecastCardsProps {
   data: ForecastData[];
 }
+
+const getWeatherIcon = (condition: string) => {
+  const lowerCondition = condition.toLowerCase();
+  
+  if (lowerCondition.includes('sun') || lowerCondition.includes('clear')) {
+    return Sun;
+  }
+  if (lowerCondition.includes('thunder') || lowerCondition.includes('storm')) {
+    return CloudLightning;
+  }
+  if (lowerCondition.includes('rain') || lowerCondition.includes('drizzle')) {
+    return CloudRain;
+  }
+  if (lowerCondition.includes('snow') || lowerCondition.includes('blizzard')) {
+    return CloudSnow;
+  }
+  if (lowerCondition.includes('cloud') || lowerCondition.includes('overcast')) {
+    return Cloud;
+  }
+  
+  // Default fallback
+  return Cloud;
+};
 
 export const ForecastCards: React.FC<ForecastCardsProps> = ({ data }) => {
   const formatDate = (dateString: string) => {
@@ -24,7 +47,7 @@ export const ForecastCards: React.FC<ForecastCardsProps> = ({ data }) => {
       <div className="flex space-x-4 overflow-x-auto pb-4">
         {data.map((forecast, index) => {
           const dateInfo = formatDate(forecast.date);
-          const IconComponent = LucideIcons[forecast.icon as keyof typeof LucideIcons] as React.ComponentType<{ className?: string }>;
+          const IconComponent = getWeatherIcon(forecast.condition);
           
           return (
             <div
@@ -38,11 +61,9 @@ export const ForecastCards: React.FC<ForecastCardsProps> = ({ data }) => {
                 {dateInfo.month} {dateInfo.day}
               </div>
               
-              {IconComponent && (
-                <div className="flex justify-center">
-                  <IconComponent className="w-8 h-8 text-weather-cloudy" />
-                </div>
-              )}
+              <div className="flex justify-center">
+                <IconComponent className="w-8 h-8 text-weather-cloudy" />
+              </div>
               
               <div className="space-y-1">
                 <div className="text-size-lg font-light tabular-nums">
