@@ -187,7 +187,7 @@ const WeatherApp = () => {
         <AnimatedBackground condition={weatherData.condition} />
       )}
       
-      <div className="container mx-auto px-4 py-6 max-w-6xl relative z-10">
+      <div className="container mx-auto px-6 py-8 max-w-7xl relative z-10">
         <Header
           darkMode={darkMode}
           onDarkModeToggle={() => setDarkMode(!darkMode)}
@@ -196,7 +196,7 @@ const WeatherApp = () => {
           onInfoClick={() => setInfoModalOpen(true)}
         />
         
-        <div className="space-y-8">
+        <div className="space-y-12">
           <LocationInput
             onSearch={handleLocationSearch}
             onGeolocation={handleGeolocation}
@@ -213,8 +213,8 @@ const WeatherApp = () => {
           
           {weatherData && (
             <>
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                <div className="lg:col-span-3 space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+                <div className="lg:col-span-3 space-y-12">
                   <CurrentWeather data={weatherData} />
                   <WeatherInsights location={weatherData.location} />
                   {forecastData.length > 0 && (
@@ -222,7 +222,7 @@ const WeatherApp = () => {
                   )}
                 </div>
                 
-                <div className="lg:col-span-1 space-y-6">
+                <div className="lg:col-span-1 space-y-8">
                   {weatherData.coordinates && (
                     <MiniMap coordinates={weatherData.coordinates} />
                   )}
@@ -233,18 +233,17 @@ const WeatherApp = () => {
             </>
           )}
           
-          <div className="flex justify-center space-x-4">
+          <div className="flex justify-center space-x-6 pt-8">
             <button
               onClick={() => setTechStackModalOpen(true)}
-              className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+              className="px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-size-base"
             >
               Tech Stack Spotlight
             </button>
             <button
               onClick={downloadResume}
-              className="px-6 py-3 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors font-medium inline-flex items-center space-x-2"
+              className="px-8 py-4 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors font-medium inline-flex items-center space-x-2 text-size-base"
             >
-              <ArrowDown className="h-4 w-4" />
               <span>Download Resume</span>
             </button>
           </div>
