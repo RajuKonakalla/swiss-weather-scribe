@@ -265,18 +265,12 @@ const WeatherApp = () => {
             </>
           )}
           
-          <div className="flex justify-center space-x-6 pt-8">
+          <div className="flex justify-center pt-8">
             <button
               onClick={() => setTechStackModalOpen(true)}
               className="px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-size-base"
             >
               Tech Stack Spotlight
-            </button>
-            <button
-              onClick={downloadResume}
-              className="px-8 py-4 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors font-medium inline-flex items-center space-x-2 text-size-base"
-            >
-              <span>Download Resume</span>
             </button>
           </div>
         </div>
