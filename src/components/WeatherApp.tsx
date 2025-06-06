@@ -14,6 +14,7 @@ import { Footer } from './weather/Footer';
 import { InfoModal } from './weather/InfoModal';
 import { TechStackModal } from './weather/TechStackModal';
 import { useToast } from '@/hooks/use-toast';
+import { geocodeLocation, fetchWeatherData, getWeatherDescription } from '@/services/weatherService';
 
 export interface WeatherData {
   location: string;
@@ -72,31 +73,61 @@ const WeatherApp = () => {
     setLoading(true);
     
     try {
-      // Simulate API call with mock data
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Geocode the location
+      const geocodeResult = await geocodeLocation(location);
       
-      const mockWeather: WeatherData = {
-        location: location,
-        temperature: 22,
-        condition: 'Partly Cloudy',
-        humidity: 65,
-        windSpeed: 12,
-        precipitation: 10,
-        icon: 'cloud-sun-rain',
-        confidence: 94,
-        coordinates: { lat: 40.7128, lng: -74.0060 }
+      if (!geocodeResult) {
+        toast({
+          title: "Location Not Found",
+          description: "Could not find the specified location. Try entering coordinates (e.g., 40.7128, -74.0060) or a more specific location name.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Fetch weather data
+      const weatherResponse = await fetchWeatherData(geocodeResult.lat, geocodeResult.lng);
+      
+      if (!weatherResponse) {
+        toast({
+          title: "Weather Data Unavailable",
+          description: "Unable to fetch weather data for this location. Please try again later.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Transform API response to app format
+      const weatherInfo = getWeatherDescription(weatherResponse.current.weather_code);
+      
+      const weatherData: WeatherData = {
+        location: geocodeResult.name,
+        temperature: Math.round(weatherResponse.current.temperature_2m),
+        condition: weatherInfo.condition,
+        humidity: weatherResponse.current.relative_humidity_2m,
+        windSpeed: Math.round(weatherResponse.current.wind_speed_10m),
+        precipitation: Math.round(weatherResponse.current.precipitation),
+        icon: weatherInfo.icon,
+        confidence: 95,
+        coordinates: { lat: geocodeResult.lat, lng: geocodeResult.lng }
       };
 
-      const mockForecast: ForecastData[] = [
-        { date: '2024-06-05', minTemp: 18, maxTemp: 25, condition: 'Sunny', icon: 'sun' },
-        { date: '2024-06-06', minTemp: 20, maxTemp: 27, condition: 'Partly Cloudy', icon: 'cloud-sun-rain' },
-        { date: '2024-06-07', minTemp: 16, maxTemp: 22, condition: 'Rainy', icon: 'cloud-sun-rain' },
-        { date: '2024-06-08', minTemp: 19, maxTemp: 24, condition: 'Cloudy', icon: 'cloud-sun-rain' },
-        { date: '2024-06-09', minTemp: 21, maxTemp: 26, condition: 'Sunny', icon: 'sun' }
-      ];
+      // Transform forecast data
+      const forecastData: ForecastData[] = weatherResponse.daily.time.slice(0, 5).map((date, index) => {
+        const forecastInfo = getWeatherDescription(weatherResponse.daily.weather_code[index]);
+        return {
+          date,
+          minTemp: Math.round(weatherResponse.daily.temperature_2m_min[index]),
+          maxTemp: Math.round(weatherResponse.daily.temperature_2m_max[index]),
+          condition: forecastInfo.condition,
+          icon: forecastInfo.icon
+        };
+      });
 
-      setWeatherData(mockWeather);
-      setForecastData(mockForecast);
+      setWeatherData(weatherData);
+      setForecastData(forecastData);
       setSearchCount(prev => prev + 1);
       
       // Add to recent searches
@@ -107,9 +138,10 @@ const WeatherApp = () => {
 
       toast({
         title: "Weather Updated",
-        description: `Successfully loaded weather for ${location}`,
+        description: `Successfully loaded weather for ${geocodeResult.name}`,
       });
     } catch (error) {
+      console.error('Weather fetch error:', error);
       toast({
         title: "Error",
         description: "Unable to fetch weather data. Please try again later.",
